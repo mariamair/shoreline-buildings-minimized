@@ -1,0 +1,1042 @@
+{
+  "info": {
+    "_postman_id": "d82042b2-24fb-4282-986d-df79ce9778bc",
+    "name": "Shoreline Buildings API Copy- minimized DB",
+    "description": "Documentation for the minimized version of the Shoreline Buildings GraphQL API, showing requests that can be used to test the API.\n\nTests can be run from the commandline using:\n\n`npx newman run .postman_collection.json -e .postman_environment.json`\n\n## 💥 Error handling\n\nErrors are returned in the `extensions` field of the GraphQL error response, with a `code` and `classification`.\n\n| Exception | Code | Classification | Message |\n| --- | --- | --- | --- |\n| `IllegalArgumentException` | `BAD_REQUEST` | `ValidationError` | Exception message |\n| `IllegalStateException` | `CONFLICT` | `ConflictError` | Exception message |\n| `EntityNotFoundException` | `NOT_FOUND` | `DataFetchingError` | Exception message |\n| _(any other exception)_ | `INTERNAL_SERVER_ERROR` | `InternalError` | `\"Internal server error\"` |\n\n---",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39898331"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Run health check before tests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct status code: 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains health message\", () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('status')",
+                  "    pm.expect(pm.response.json().status).to.equal('UP')",
+                  "    pm.expect(pm.response.json()).to.have.property('service')",
+                  "    pm.expect(pm.response.json().service).to.equal('Building Count API')",
+                  "})",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{shorelineApiHealthUrl}}",
+              "host": [
+                "{{shorelineApiHealthUrl}}"
+              ]
+            },
+            "description": "Check that the authentication server can be reached."
+          },
+          "response": [
+            {
+              "name": "Run health check before tests",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{shorelineApiHealthUrl}}",
+                  "host": [
+                    "{{shorelineApiHealthUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Fri, 08 May 2026 19:05:03 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": \"UP\",\n    \"service\": \"Building Count API\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Requests that test the authentication API."
+    },
+    {
+      "name": "Building Count Entities - Read operations",
+      "item": [
+        {
+          "name": "Get building count entities",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct status code: 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains data', () => {",
+                  "    pm.expect(response).to.have.property(\"data\")",
+                  "});",
+                  "",
+                  "const entities = response.data.buildingCountEntities.items;",
+                  "",
+                  "pm.test(\"All entities have a valid id\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('id');",
+                  "        pm.expect(entity.id).to.be.a('number');",
+                  "    })",
+                  "});",
+                  "",
+                  "pm.test(\"All entities have a valid year\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('year');",
+                  "        pm.expect(entity.year).to.be.a('number');",
+                  "    })",
+                  "});",
+                  "",
+                  "pm.test(\"All entities have a valid building count\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('buildingCount');",
+                  "        pm.expect(entity.buildingCount).to.be.a('number');",
+                  "    })",
+                  "});",
+                  "",
+                  "pm.test(\"All entities have a valid region\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('region');",
+                  "        pm.expect(entity.region).to.be.a('object');",
+                  "        pm.expect(entity.region).to.have.property('code')",
+                  "        pm.expect(entity.region.code).to.be.a('string')",
+                  "        pm.expect(entity.region).to.have.property('name')",
+                  "        pm.expect(entity.region.name).to.be.a('string')",
+                  "        pm.expect(entity.region).to.have.property('parentCode')",
+                  "        pm.expect(entity.region).to.have.property('regionType')",
+                  "        pm.expect(entity.region.regionType).to.be.a('object')",
+                  "        pm.expect(entity.region.regionType).to.have.property('id');",
+                  "        pm.expect(entity.region.regionType.id).to.be.a('number')",
+                  "        pm.expect(entity.region.regionType).to.have.property('name');",
+                  "        pm.expect(entity.region.regionType.name).to.be.a('string')",
+                  "    })",
+                  "});",
+                  "",
+                  "pm.test(\"All entities have a valid area type\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('areaType');",
+                  "        pm.expect(entity.areaType).to.be.a('object');",
+                  "        pm.expect(entity.areaType).to.have.property('id');",
+                  "        pm.expect(entity.areaType.id).to.be.a('number')",
+                  "        pm.expect(entity.areaType).to.have.property('name');",
+                  "        pm.expect(entity.areaType.name).to.be.a('string')",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"All entities have timestamps\", () => {",
+                  "    entities.forEach((entity) => {",
+                  "        pm.expect(entity).to.have.property('createdAt');",
+                  "        pm.expect(entity.createdAt).to.be.a('string');",
+                  "        pm.expect(entity).to.have.property('updatedAt');",
+                  "        pm.expect(entity.updatedAt).to.be.a('string')",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query BuildingCountEntities {\n    buildingCountEntities {\n        items {\n            id\n            year\n            buildingCount\n            region {\n                code\n                name\n                regionType {\n                    id\n                    name\n                }\n                parentCode\n            }\n            areaType {\n                id\n                name\n            }\n            createdAt\n            updatedAt\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Fetch building count entities with all fields.\n\n- Use default limit and offset.\n    \n- Use no filters.\n    \n- Validate all fields."
+          },
+          "response": [
+            {
+              "name": "Get building count entities",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query BuildingCountEntities {\n    buildingCountEntities {\n        items {\n            id\n            year\n            buildingCount\n            region {\n                code\n                name\n                regionType {\n                    id\n                    name\n                }\n                parentCode\n            }\n            areaType {\n                id\n                name\n            }\n            createdAt\n            updatedAt\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Fri, 08 May 2026 14:26:16 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"buildingCountEntities\": {\n            \"items\": [\n                {\n                    \"id\": 1,\n                    \"year\": 2018,\n                    \"buildingCount\": 411769,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 2,\n                    \"year\": 2019,\n                    \"buildingCount\": 421505,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 3,\n                    \"year\": 2020,\n                    \"buildingCount\": 435837,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 4,\n                    \"year\": 2021,\n                    \"buildingCount\": 446828,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 5,\n                    \"year\": 2022,\n                    \"buildingCount\": 459541,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 6,\n                    \"year\": 2023,\n                    \"buildingCount\": 469436,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 7,\n                    \"year\": 2018,\n                    \"buildingCount\": 24020,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 8,\n                    \"year\": 2019,\n                    \"buildingCount\": 24835,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 9,\n                    \"year\": 2020,\n                    \"buildingCount\": 25104,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 10,\n                    \"year\": 2021,\n                    \"buildingCount\": 25395,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 11,\n                    \"year\": 2022,\n                    \"buildingCount\": 25951,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 12,\n                    \"year\": 2023,\n                    \"buildingCount\": 26186,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 13,\n                    \"year\": 2018,\n                    \"buildingCount\": 1261169,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 14,\n                    \"year\": 2019,\n                    \"buildingCount\": 1287640,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 15,\n                    \"year\": 2020,\n                    \"buildingCount\": 1308269,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 16,\n                    \"year\": 2021,\n                    \"buildingCount\": 1337050,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 17,\n                    \"year\": 2022,\n                    \"buildingCount\": 1372031,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 18,\n                    \"year\": 2023,\n                    \"buildingCount\": 1386939,\n                    \"region\": {\n                        \"code\": \"00\",\n                        \"name\": \"Riket\",\n                        \"regionType\": {\n                            \"id\": 1,\n                            \"name\": \"riket\"\n                        },\n                        \"parentCode\": null\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 19,\n                    \"year\": 2018,\n                    \"buildingCount\": 58578,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 20,\n                    \"year\": 2019,\n                    \"buildingCount\": 59141,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 21,\n                    \"year\": 2020,\n                    \"buildingCount\": 61259,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 22,\n                    \"year\": 2021,\n                    \"buildingCount\": 68062,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 23,\n                    \"year\": 2022,\n                    \"buildingCount\": 70671,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 24,\n                    \"year\": 2023,\n                    \"buildingCount\": 71724,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 25,\n                    \"year\": 2018,\n                    \"buildingCount\": 2467,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 26,\n                    \"year\": 2019,\n                    \"buildingCount\": 2501,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 27,\n                    \"year\": 2020,\n                    \"buildingCount\": 2528,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 28,\n                    \"year\": 2021,\n                    \"buildingCount\": 2633,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 29,\n                    \"year\": 2022,\n                    \"buildingCount\": 2730,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 30,\n                    \"year\": 2023,\n                    \"buildingCount\": 2754,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 31,\n                    \"year\": 2018,\n                    \"buildingCount\": 127169,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 32,\n                    \"year\": 2019,\n                    \"buildingCount\": 128187,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 33,\n                    \"year\": 2020,\n                    \"buildingCount\": 132172,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 34,\n                    \"year\": 2021,\n                    \"buildingCount\": 146940,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 35,\n                    \"year\": 2022,\n                    \"buildingCount\": 153414,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 36,\n                    \"year\": 2023,\n                    \"buildingCount\": 154333,\n                    \"region\": {\n                        \"code\": \"01\",\n                        \"name\": \"Stockholms län\",\n                        \"regionType\": {\n                            \"id\": 2,\n                            \"name\": \"län\"\n                        },\n                        \"parentCode\": \"00\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 37,\n                    \"year\": 2018,\n                    \"buildingCount\": 638,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 38,\n                    \"year\": 2019,\n                    \"buildingCount\": 660,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 39,\n                    \"year\": 2020,\n                    \"buildingCount\": 660,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 40,\n                    \"year\": 2021,\n                    \"buildingCount\": 667,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 41,\n                    \"year\": 2022,\n                    \"buildingCount\": 683,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 42,\n                    \"year\": 2023,\n                    \"buildingCount\": 671,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 2,\n                        \"name\": \"inom tätort\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 43,\n                    \"year\": 2018,\n                    \"buildingCount\": 12,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 44,\n                    \"year\": 2019,\n                    \"buildingCount\": 12,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 45,\n                    \"year\": 2020,\n                    \"buildingCount\": 12,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 46,\n                    \"year\": 2021,\n                    \"buildingCount\": 12,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 47,\n                    \"year\": 2022,\n                    \"buildingCount\": 12,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 48,\n                    \"year\": 2023,\n                    \"buildingCount\": 11,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 3,\n                        \"name\": \"inom formellt skyddad natur\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 49,\n                    \"year\": 2018,\n                    \"buildingCount\": 850,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                },\n                {\n                    \"id\": 50,\n                    \"year\": 2019,\n                    \"buildingCount\": 883,\n                    \"region\": {\n                        \"code\": \"0114\",\n                        \"name\": \"Upplands Väsby\",\n                        \"regionType\": {\n                            \"id\": 3,\n                            \"name\": \"kommun\"\n                        },\n                        \"parentCode\": \"01\"\n                    },\n                    \"areaType\": {\n                        \"id\": 1,\n                        \"name\": \"totalt\"\n                    },\n                    \"createdAt\": \"2026-05-08 13:04:02.69\",\n                    \"updatedAt\": \"2026-05-08 13:04:02.69\"\n                }\n            ],\n            \"totalCount\": 5616,\n            \"limit\": 50,\n            \"offset\": 0,\n            \"hasNextPage\": true\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get building count entity by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct status code: 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains data', () => {",
+                  "    pm.expect(response).to.have.property(\"data\")",
+                  "});",
+                  "",
+                  "const entity = response.data.buildingCountEntity;",
+                  "",
+                  "pm.test(\"Entity has a valid id\", () => {",
+                  "    pm.expect(entity).to.have.property('id');",
+                  "    pm.expect(entity.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test(\"Entity has a valid year\", () => {",
+                  "    pm.expect(entity).to.have.property('year');",
+                  "    pm.expect(entity.year).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test(\"Entity has a valid building count\", () => {",
+                  "    pm.expect(entity).to.have.property('buildingCount');",
+                  "    pm.expect(entity.buildingCount).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test(\"Entity has a valid region\", () => {",
+                  "    pm.expect(entity).to.have.property('region');",
+                  "    pm.expect(entity.region).to.be.a('object');",
+                  "    pm.expect(entity.region).to.have.property('code')",
+                  "    pm.expect(entity.region.code).to.be.a('string')",
+                  "    pm.expect(entity.region).to.have.property('name')",
+                  "    pm.expect(entity.region.name).to.be.a('string')",
+                  "    pm.expect(entity.region).to.have.property('parentCode')",
+                  "    pm.expect(entity.region).to.have.property('regionType')",
+                  "    pm.expect(entity.region.regionType).to.be.a('object')",
+                  "    pm.expect(entity.region.regionType).to.have.property('id');",
+                  "    pm.expect(entity.region.regionType.id).to.be.a('number')",
+                  "    pm.expect(entity.region.regionType).to.have.property('name');",
+                  "    pm.expect(entity.region.regionType.name).to.be.a('string')",
+                  "});",
+                  "",
+                  "pm.test(\"Entity has a valid area type\", () => {",
+                  "    pm.expect(entity).to.have.property('areaType');",
+                  "    pm.expect(entity.areaType).to.be.a('object');",
+                  "    pm.expect(entity.areaType).to.have.property('id');",
+                  "    pm.expect(entity.areaType.id).to.be.a('number')",
+                  "    pm.expect(entity.areaType).to.have.property('name');",
+                  "    pm.expect(entity.areaType.name).to.be.a('string')",
+                  "});",
+                  "",
+                  "",
+                  "pm.test(\"Entity has timestamps\", () => {",
+                  "    pm.expect(entity).to.have.property('createdAt');",
+                  "    pm.expect(entity.createdAt).to.be.a('string');",
+                  "    pm.expect(entity).to.have.property('updatedAt');",
+                  "    pm.expect(entity.updatedAt).to.be.a('string')",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const min = 1;",
+                  "const max = 5000;",
+                  "",
+                  "const generatedEntityId = Math.floor(Math.random() * (max - min + 1)) + min;",
+                  "pm.collectionVariables.set(\"entityId\", generatedEntityId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query BuildingCountEntity($id: Int!) {\n    buildingCountEntity(id: $id) {\n            id\n    year\n    buildingCount\n    region {\n      code\n      name\n      regionType {\n        id\n        name\n      }\n      parentCode\n    }\n    areaType {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n  }\n}\n",
+                "variables": "{\n    \"id\": {{entityId}}\n}"
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Fetch one building count entity.\n\n- Use randomly picked id.\n    \n- Validate all fields."
+          },
+          "response": [
+            {
+              "name": "Get building count entity by id",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query BuildingCountEntity($id: Int!) {\n    buildingCountEntity(id: $id) {\n            id\n    year\n    buildingCount\n    region {\n      code\n      name\n      regionType {\n        id\n        name\n      }\n      parentCode\n    }\n    areaType {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n  }\n}\n",
+                    "variables": "{\n    \"id\": {{entityId}}\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Fri, 08 May 2026 14:28:28 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"buildingCountEntity\": {\n            \"id\": 2431,\n            \"year\": 2018,\n            \"buildingCount\": 3463,\n            \"region\": {\n                \"code\": \"1290\",\n                \"name\": \"Kristianstad\",\n                \"regionType\": {\n                    \"id\": 3,\n                    \"name\": \"kommun\"\n                },\n                \"parentCode\": \"12\"\n            },\n            \"areaType\": {\n                \"id\": 2,\n                \"name\": \"inom tätort\"\n            },\n            \"createdAt\": \"2026-05-08 13:04:02.69\",\n            \"updatedAt\": \"2026-05-08 13:04:02.69\"\n        }\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Requests that test the read operations on building count entities."
+    },
+    {
+      "name": "Building Count entities - Invalid input",
+      "item": [
+        {
+          "name": "Get building count entities with invalid filter values",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has status code 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains errors', () => {",
+                  "    pm.expect(response).to.have.property(\"errors\")",
+                  "});",
+                  "",
+                  "pm.test('Response contains error message', () => {",
+                  "    pm.expect(response.errors[0]).to.have.property(\"message\")",
+                  "    pm.expect(response.errors[0].message).to.contain(\"Invalid filter value(s)\")",
+                  "    pm.expect(response.errors[0].message).to.contain(\"is not a valid region code\")",
+                  "    pm.expect(response.errors[0].message).to.contain(\"is not a valid area type\")",
+                  "    pm.expect(response.errors[0].message).to.contain(\"is not a valid year\")",
+                  "});",
+                  "",
+                  "pm.test('Response contains no data', () => {",
+                  "    pm.expect(response.data.buildingCountEntities).to.be.null",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const invalidAreaTypeId = 51;",
+                  "pm.collectionVariables.set(\"invalidAreaTypeId\", invalidAreaTypeId);",
+                  "",
+                  "const invalidRegionCode = \"99\";",
+                  "pm.collectionVariables.set(\"invalidRegionCode\", invalidRegionCode);",
+                  "",
+                  "const invalidYear = 20;",
+                  "pm.collectionVariables.set(\"invalidYear\", invalidYear);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query BuildingCountEntities($regionCode: String! \n            $areaTypeId: Int!\n            $year: Int!) {\n    buildingCountEntities(\n        filter: {\n            regionCode: $regionCode\n            areaTypeId: $areaTypeId\n            year: $year\n        }\n    ) {\n        items {\n            id\n            year\n            buildingCount\n            region {\n                code\n                name\n                regionType {\n                    id\n                    name\n                }\n                parentCode\n            }\n            areaType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                "variables": "{\n    \"regionCode\": \"{{invalidRegionCode}}\", \n    \"areaTypeId\": {{invalidAreaTypeId}}, \n    \"year\": {{invalidYear}}\n}"
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Try to fetch building count entities with invalid filter values.\n\n- Use invalid input for all filter variables that have boundaries.\n    \n- Use default limit and offset.\n    \n- Validate error message."
+          },
+          "response": [
+            {
+              "name": "Get building count entities with invalid filter values",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query BuildingCountEntities($regionCode: String! \n            $areaTypeId: Int!\n            $year: Int!) {\n    buildingCountEntities(\n        filter: {\n            regionCode: $regionCode\n            areaTypeId: $areaTypeId\n            year: $year\n        }\n    ) {\n        items {\n            id\n            year\n            buildingCount\n            region {\n                code\n                name\n                regionType {\n                    id\n                    name\n                }\n                parentCode\n            }\n            areaType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                    "variables": "{\n    \"regionCode\": \"{{invalidRegionCode}}\", \n    \"areaTypeId\": {{invalidAreaTypeId}}, \n    \"year\": {{invalidYear}}\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Fri, 08 May 2026 17:10:08 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"errors\": [\n        {\n            \"message\": \"Invalid filter value(s): '99' is not a valid region code; '51' is not a valid area type; '20' is not a valid year\",\n            \"locations\": [\n                {\n                    \"line\": 4,\n                    \"column\": 5\n                }\n            ],\n            \"path\": [\n                \"buildingCountEntities\"\n            ],\n            \"extensions\": {\n                \"classification\": \"ValidationError\",\n                \"code\": \"BAD_REQUEST\"\n            }\n        }\n    ],\n    \"data\": {\n        \"buildingCountEntities\": null\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Requests that test invalid read and create operations on building count entities.",
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Regions",
+      "item": [
+        {
+          "name": "Response time",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time is less than 600ms\", () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(600);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains data', function () {",
+                  "    pm.expect(response.data).to.have.property(\"regions\")",
+                  "});",
+                  "",
+                  "pm.test(\"All regions have a region code\", () => {",
+                  "    const regions = response.data.regions.items;",
+                  "    ",
+                  "    regions.forEach((region) => {",
+                  "        pm.expect(region).to.have.property('code');",
+                  "        pm.expect(region.code).to.be.a('string');",
+                  "    });",
+                  "});",
+                  "",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Regions {\n    regions {\n        items {\n            code\n            name\n            regionType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Check that response time for all regions with all fields is less than 600ms.\n\n- Use limit 500 to get all 312 regions.\n    \n- Validate all fields."
+          },
+          "response": [
+            {
+              "name": "Response time",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query Regions {\n    regions {\n        items {\n            code\n            name\n            regionType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 18 Mar 2026 10:46:54 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"regions\": {\n            \"items\": [\n                {\n                    \"code\": \"00\",\n                    \"name\": \"Riket\",\n                    \"regionType\": {\n                        \"id\": 1,\n                        \"name\": \"sverige\"\n                    }\n                },\n                {\n                    \"code\": \"01\",\n                    \"name\": \"Stockholms län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0114\",\n                    \"name\": \"Upplands Väsby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0115\",\n                    \"name\": \"Vallentuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0117\",\n                    \"name\": \"Österåker\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0120\",\n                    \"name\": \"Värmdö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0123\",\n                    \"name\": \"Järfälla\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0125\",\n                    \"name\": \"Ekerö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0126\",\n                    \"name\": \"Huddinge\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0127\",\n                    \"name\": \"Botkyrka\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0128\",\n                    \"name\": \"Salem\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0136\",\n                    \"name\": \"Haninge\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0138\",\n                    \"name\": \"Tyresö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0139\",\n                    \"name\": \"Upplands-Bro\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0140\",\n                    \"name\": \"Nykvarn\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0160\",\n                    \"name\": \"Täby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0162\",\n                    \"name\": \"Danderyd\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0163\",\n                    \"name\": \"Sollentuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0180\",\n                    \"name\": \"Stockholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0181\",\n                    \"name\": \"Södertälje\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0182\",\n                    \"name\": \"Nacka\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0183\",\n                    \"name\": \"Sundbyberg\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0184\",\n                    \"name\": \"Solna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0186\",\n                    \"name\": \"Lidingö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0187\",\n                    \"name\": \"Vaxholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0188\",\n                    \"name\": \"Norrtälje\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0191\",\n                    \"name\": \"Sigtuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0192\",\n                    \"name\": \"Nynäshamn\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"03\",\n                    \"name\": \"Uppsala län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0305\",\n                    \"name\": \"Håbo\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0319\",\n                    \"name\": \"Älvkarleby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0330\",\n                    \"name\": \"Knivsta\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0331\",\n                    \"name\": \"Heby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0360\",\n                    \"name\": \"Tierp\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0380\",\n                    \"name\": \"Uppsala\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0381\",\n                    \"name\": \"Enköping\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0382\",\n                    \"name\": \"Östhammar\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"04\",\n                    \"name\": \"Södermanlands län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0428\",\n                    \"name\": \"Vingåker\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0461\",\n                    \"name\": \"Gnesta\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0480\",\n                    \"name\": \"Nyköping\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0481\",\n                    \"name\": \"Oxelösund\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0482\",\n                    \"name\": \"Flen\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0483\",\n                    \"name\": \"Katrineholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0484\",\n                    \"name\": \"Eskilstuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0486\",\n                    \"name\": \"Strängnäs\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0488\",\n                    \"name\": \"Trosa\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"05\",\n                    \"name\": \"Östergötlands län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0509\",\n                    \"name\": \"Ödeshög\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0512\",\n                    \"name\": \"Ydre\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                }\n            ],\n            \"totalCount\": 312,\n            \"limit\": 50,\n            \"offset\": 0,\n            \"hasNextPage\": true\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get regions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct status code\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains data', function () {",
+                  "    pm.expect(response).to.have.property(\"data\")",
+                  "});",
+                  "",
+                  "pm.test('Response contains regions', function () {",
+                  "    pm.expect(response.data).to.have.property(\"regions\")",
+                  "});",
+                  "",
+                  "pm.test(\"All regions have valid properties\", () => {",
+                  "    const regions = response.data.regions.items;",
+                  "    ",
+                  "    regions.forEach((region) => {",
+                  "        pm.expect(region).to.have.property('code');",
+                  "        pm.expect(region.code).to.be.a('string');",
+                  "        pm.expect(region).to.have.property('name');",
+                  "        pm.expect(region.name).to.be.a('string');",
+                  "        pm.expect(region).to.have.property('regionType');",
+                  "        pm.expect(region.regionType).to.be.a('object');",
+                  "        pm.expect(region.regionType).to.have.property('id');",
+                  "        pm.expect(region.regionType.id).to.be.a('number');",
+                  "        pm.expect(region.regionType).to.have.property('name');",
+                  "        pm.expect(region.regionType.name).to.be.a('string');",
+                  "    });",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Regions {\n    regions {\n        items {\n            code\n            name\n            regionType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Fetch regions with all fields.\n\n- Use default limit and offset.\n    \n- Validate all fields."
+          },
+          "response": [
+            {
+              "name": "Get regions",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query Regions {\n    regions {\n        items {\n            code\n            name\n            regionType {\n                id\n                name\n            }\n        }\n        totalCount\n        limit\n        offset\n        hasNextPage\n    }\n}\n",
+                    "variables": ""
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 18 Mar 2026 10:46:59 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"regions\": {\n            \"items\": [\n                {\n                    \"code\": \"00\",\n                    \"name\": \"Riket\",\n                    \"regionType\": {\n                        \"id\": 1,\n                        \"name\": \"sverige\"\n                    }\n                },\n                {\n                    \"code\": \"01\",\n                    \"name\": \"Stockholms län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0114\",\n                    \"name\": \"Upplands Väsby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0115\",\n                    \"name\": \"Vallentuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0117\",\n                    \"name\": \"Österåker\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0120\",\n                    \"name\": \"Värmdö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0123\",\n                    \"name\": \"Järfälla\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0125\",\n                    \"name\": \"Ekerö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0126\",\n                    \"name\": \"Huddinge\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0127\",\n                    \"name\": \"Botkyrka\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0128\",\n                    \"name\": \"Salem\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0136\",\n                    \"name\": \"Haninge\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0138\",\n                    \"name\": \"Tyresö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0139\",\n                    \"name\": \"Upplands-Bro\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0140\",\n                    \"name\": \"Nykvarn\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0160\",\n                    \"name\": \"Täby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0162\",\n                    \"name\": \"Danderyd\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0163\",\n                    \"name\": \"Sollentuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0180\",\n                    \"name\": \"Stockholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0181\",\n                    \"name\": \"Södertälje\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0182\",\n                    \"name\": \"Nacka\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0183\",\n                    \"name\": \"Sundbyberg\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0184\",\n                    \"name\": \"Solna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0186\",\n                    \"name\": \"Lidingö\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0187\",\n                    \"name\": \"Vaxholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0188\",\n                    \"name\": \"Norrtälje\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0191\",\n                    \"name\": \"Sigtuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0192\",\n                    \"name\": \"Nynäshamn\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"03\",\n                    \"name\": \"Uppsala län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0305\",\n                    \"name\": \"Håbo\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0319\",\n                    \"name\": \"Älvkarleby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0330\",\n                    \"name\": \"Knivsta\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0331\",\n                    \"name\": \"Heby\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0360\",\n                    \"name\": \"Tierp\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0380\",\n                    \"name\": \"Uppsala\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0381\",\n                    \"name\": \"Enköping\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0382\",\n                    \"name\": \"Östhammar\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"04\",\n                    \"name\": \"Södermanlands län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0428\",\n                    \"name\": \"Vingåker\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0461\",\n                    \"name\": \"Gnesta\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0480\",\n                    \"name\": \"Nyköping\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0481\",\n                    \"name\": \"Oxelösund\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0482\",\n                    \"name\": \"Flen\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0483\",\n                    \"name\": \"Katrineholm\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0484\",\n                    \"name\": \"Eskilstuna\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0486\",\n                    \"name\": \"Strängnäs\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0488\",\n                    \"name\": \"Trosa\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"05\",\n                    \"name\": \"Östergötlands län\",\n                    \"regionType\": {\n                        \"id\": 2,\n                        \"name\": \"län\"\n                    }\n                },\n                {\n                    \"code\": \"0509\",\n                    \"name\": \"Ödeshög\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                },\n                {\n                    \"code\": \"0512\",\n                    \"name\": \"Ydre\",\n                    \"regionType\": {\n                        \"id\": 3,\n                        \"name\": \"kommun\"\n                    }\n                }\n            ],\n            \"totalCount\": 312,\n            \"limit\": 50,\n            \"offset\": 0,\n            \"hasNextPage\": true\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get region by region code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Content-Type is application/json\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct status code\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Response contains data', function () {",
+                  "    pm.expect(response).to.have.property(\"data\")",
+                  "});",
+                  "",
+                  "pm.test('Response contains region', function () {",
+                  "    pm.expect(response.data).to.have.property(\"region\")",
+                  "});",
+                  "",
+                  "pm.test(\"Region has valid properties\", () => {",
+                  "    const region = response.data.region;",
+                  "    pm.expect(region).to.have.property('code');",
+                  "    pm.expect(region.code).to.be.a('string');",
+                  "    pm.expect(region).to.have.property('name');",
+                  "    pm.expect(region.name).to.be.a('string');",
+                  "    pm.expect(region).to.have.property('regionType');",
+                  "    pm.expect(region.regionType).to.be.a('object');",
+                  "    pm.expect(region.regionType).to.have.property('id');",
+                  "    pm.expect(region.regionType.id).to.be.a('number');",
+                  "    pm.expect(region.regionType).to.have.property('name');",
+                  "    pm.expect(region.regionType.name).to.be.a('string');",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const regionCodes = [\"24\", \"2401\", \"2403\", \"2404\", \"2409\", \"2417\", \"2418\", \"2421\", \"2422\", \"2425\", \"2460\", \"2462\", \"2463\", \"2480\", \"2481\", \"2482\"];",
+                  "const randomRegionCode = regionCodes[Math.floor(Math.random() * regionCodes.length)];",
+                  "pm.collectionVariables.set(\"regionCode\", randomRegionCode);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Region($regionCode: String!) {\n    region(code: $regionCode) {\n        code\n        name\n        regionType {\n            id\n            name\n        }\n    }\n}\n",
+                "variables": "{\n    \"regionCode\": \"{{regionCode}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{shorelineQueryUrl}}",
+              "host": [
+                "{{shorelineQueryUrl}}"
+              ]
+            },
+            "description": "Fetch one region.\n\n- Use randomly picked region code.\n    \n- Validate all fields."
+          },
+          "response": [
+            {
+              "name": "Get region by region code",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "graphql",
+                  "graphql": {
+                    "query": "query Region($regionCode: String!) {\n    region(code: $regionCode) {\n        code\n        name\n        regionType {\n            id\n            name\n        }\n    }\n}\n",
+                    "variables": "{\n    \"regionCode\": \"{{regionCode}}\"\n}"
+                  }
+                },
+                "url": {
+                  "raw": "{{shorelineQueryUrl}}",
+                  "host": [
+                    "{{shorelineQueryUrl}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 18 Mar 2026 10:47:04 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"region\": {\n            \"code\": \"2409\",\n            \"name\": \"Robertsfors\",\n            \"regionType\": {\n                \"id\": 3,\n                \"name\": \"kommun\"\n            }\n        }\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Requests that test the read operations on regions."
+    },
+    {
+      "name": "Reset collection",
+      "item": [
+        {
+          "name": "Reset variables",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.clear();"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{shorelineApiHealthUrl}}",
+              "host": [
+                "{{shorelineApiHealthUrl}}"
+              ]
+            },
+            "description": "Resets all variables that have been used by the tests."
+          },
+          "response": []
+        }
+      ],
+      "description": "Contains a reset request to ensure no variables are saved between different test runs."
+    }
+  ]
+}
