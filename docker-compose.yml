@@ -1,0 +1,62 @@
+services:  
+  db:
+    image: postgres:18.2
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_ADMIN}
+      POSTGRES_PASSWORD: ${DB_ADMIN_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      DB_USER: ${DB_USER}
+      DB_USER_PASSWORD: ${DB_USER_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/
+      - ./db/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./db/02-init-db.sh:/docker-entrypoint-initdb.d/02-init-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_ADMIN} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    image: ${REGISTRY}/backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ${REGISTRY}/frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      backend:
+        condition: service_started
+
+  seed:
+    image: ${REGISTRY}/seed:${IMAGE_TAG:-latest}
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_USER_PASSWORD}@db:${DB_PORT}/${DB_NAME}
+      CSV_PATH: ${CSV_PATH}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./seed/data:/app/seed/data
+
+volumes:
+  pg_data:

@@ -1,0 +1,18 @@
+services:  
+  db:
+
+  backend:
+    image: null
+    build:
+      context: ./backend
+  
+  frontend:
+    image: null
+    build:
+      context: ./frontend
+
+  seed:
+    image: null
+    build:
+      context: ./seed
+
