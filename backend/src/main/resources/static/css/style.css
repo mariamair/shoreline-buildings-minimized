@@ -1,0 +1,27 @@
+body {
+  font-family: sans-serif;
+  font-size: 16px;
+  margin: 30px;
+}
+
+h2 {
+  padding-top: 20px;
+}
+
+th, td {
+  padding: 5px 10px;
+}
+
+th {
+  background-color: #96D4D4;
+}
+
+tr:nth-child(even) {
+  background-color: #ccd4d4;
+}
+
+.icon {
+  margin: 0 5px 0 20px;
+  width: 15px;
+  height: 15px;
+}

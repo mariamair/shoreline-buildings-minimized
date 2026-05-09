@@ -1,0 +1,85 @@
+  "Values that can be used to filter the search results."
+  input BuildingCountFilter {
+    regionCode: String
+    parentRegionCode: String
+    regionTypeId: Int
+    areaTypeId: Int
+    year: Int
+  }
+
+  "Values that can be used to filter the search results."
+  input RegionFilter {
+    parentRegionCode: String
+    regionTypeId: Int
+  }
+  
+  type Query {
+    "Search for a building count entity by id."
+    buildingCountEntity(id: Int!): BuildingCountEntity
+
+    "Search for all building count entities. Filtering by different variables is possible."
+    buildingCountEntities(filter: BuildingCountFilter, limit: Int = 50, offset: Int = 0): BuildingCountPage
+
+    "Search for a region by region code."
+    region(code: String!): Region
+
+    "Search for all regions. Filtering by region type and parent region code is possible."
+    regions(filter: RegionFilter, limit: Int = 50, offset: Int = 0): RegionPage
+  }
+
+  "Displays building count entities as well as metadeta for the search results."
+  type BuildingCountPage {
+    items: [BuildingCountEntity]
+    totalCount: Int
+    limit: Int
+    offset: Int
+    hasNextPage: Boolean
+  }
+
+  "Displays regions as well as metadeta for the search results."
+  type RegionPage {
+    items: [Region]
+    totalCount: Int
+    limit: Int
+    offset: Int
+    hasNextPage: Boolean
+  }
+
+  """
+  The buildings counted at shorelines in Sweden, reported per region, area type and year.
+  """
+  type BuildingCountEntity {
+    id: Int!
+    region: Region
+    areaType: AreaType
+    year: Int!
+    buildingCount: Int
+    createdAt: String
+    updatedAt: String
+  }
+
+  """
+  The regions in Sweden, which can be municipalities, counties or the whole country.
+  """
+  type Region {
+    code: String!
+    name: String!
+    regionType: RegionType
+    parentCode: String
+  }
+
+  """
+  The region types can be `riket` (the whole country), `län` (county) or `kommun` (municipality).
+  """
+  type RegionType {
+    id: Int!
+    name: String!
+  }
+
+  """
+  The different area types registered for shoreline buildings in Sweden. Only `inom tätort` (within locality) and `inom formellt skyddad natur` (in a protected area) are separately identified. All other areas types are included in the total amount without further specification.
+  """
+  type AreaType {
+    id: Int!
+    name: String!
+  }
