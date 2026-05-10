@@ -65,7 +65,7 @@
     code: String!
     name: String!
     regionType: RegionType
-    parentCode: String
+    parentRegionCode: String
   }
 
   """

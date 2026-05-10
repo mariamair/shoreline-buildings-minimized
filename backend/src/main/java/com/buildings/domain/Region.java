@@ -4,13 +4,13 @@ public class Region {
   private final String code;
   private final String name;
   private final int regionTypeId;
-  private final String parentCode;
+  private final String parentRegionCode;
 
-  public Region(final String code, final String name, final int regionTypeId, final String parentCode) {
+  public Region(final String code, final String name, final int regionTypeId, final String parentRegionCode) {
     this.code = code;
     this.name = name;
     this.regionTypeId = regionTypeId;
-    this.parentCode = parentCode;
+    this.parentRegionCode = parentRegionCode;
   }
 
   public String getCode() {
@@ -25,7 +25,7 @@ public class Region {
     return regionTypeId;
   }
 
-  public String getParentCode() {
-    return parentCode;
+  public String getparentRegionCode() {
+    return parentRegionCode;
   }
 }

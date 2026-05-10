@@ -1,11 +1,14 @@
 package com.buildings.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class EnvConfig {
   static {
     // Try to find .env file by going up directory levels
@@ -31,7 +34,6 @@ public class EnvConfig {
     for (int i = 0; i < levels; i++) {
       java.nio.file.Path envFile = current.resolve(envFileName);
       if (Files.exists(envFile)) {
-        System.out.println("Found .env at: " + envFile.getParent());
         return envFile.getParent().toString();
       }
       current = current.getParent();
@@ -40,7 +42,7 @@ public class EnvConfig {
       }
     }
 
-    System.out.println("Warning: .env file not found");
+    log.error("Warning: .env file not found");
     return null;
     }
 }
