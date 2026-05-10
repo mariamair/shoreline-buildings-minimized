@@ -33,8 +33,8 @@ public class RegionService {
   }
 
   public List<Region> getRegions(
-    final RegionFilter filter, 
-    final Integer limit, 
+    final RegionFilter filter,
+    final Integer limit,
     final Integer offset) {
     List<Region> regions = regionRepository.findRegions(filter, limit, offset);
     return regions;
