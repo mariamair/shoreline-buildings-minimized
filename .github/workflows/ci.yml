@@ -158,7 +158,7 @@ jobs:
       - name: Build seed (if changed)
         if: needs.detect-changes.outputs.seed == 'true' || github.event.inputs.force_rebuild == 'true'
         run: |
-          docker build -f ./seed/Dockerfile.minimizedDB \
+          docker build \
             -t $REGISTRY/seed:${IMAGE_TAG} \
             -t $REGISTRY/seed:main \
             -t $REGISTRY/seed:latest \
