@@ -336,10 +336,10 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST << EOF
             cd $DO_PRODUCTION_HOST_DEPLOY_PATH
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            docker compose up -d db
-            docker compose up seed
-            docker compose up -d backend
-            docker compose up -d frontend
+            docker compose -p shorelinebuildings up -d db
+            docker compose -p shorelinebuildings up seed
+            docker compose -p shorelinebuildings up -d backend
+            docker compose -p shorelinebuildings up -d frontend
             echo "Docker containers after deploy:"
             sudo docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}"
             exit
