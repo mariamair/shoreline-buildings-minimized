@@ -273,7 +273,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 \
             $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST \
-            "mkdir -p $PDO_RODUCTION_HOST_DEPLOY_PATH"
+            "mkdir -p $DO_PRODUCTION_HOST_DEPLOY_PATH"
       
       - name: Copy docker compose and init files to server
         run: |
