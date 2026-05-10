@@ -295,11 +295,12 @@ jobs:
             scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 \
             ./db/02-init-db.sh \
             $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST:$DO_PRODUCTION_HOST_DEPLOY_PATH/db/ \
-            chmod +x DO_PRODUCTION_HOST_DEPLOY_PATH/db/02-init-db.sh
+            chmod +x $DO_PRODUCTION_HOST_DEPLOY_PATH/db/02-init-db.sh
             
             scp -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 \
             ./seed/data/shoreline_buildings.csv \
             $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST:$DO_PRODUCTION_HOST_DEPLOY_PATH/seed/data/
+
 
       - name: Create .env on server
         run: |
