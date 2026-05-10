@@ -202,10 +202,10 @@ jobs:
           DB_HOST=db
           NEXTAUTH_URL=http://localhost:3000
           NEXTAUTH_SECRET=${{ secrets.CI_NEXTAUTH_SECRET }}
-          GITLAB_CLIENT_ID=${{ secrets.CI_GITLAB_CLIENT_ID }}
-          GITLAB_CLIENT_SECRET=${{ secrets.CI_GITLAB_CLIENT_SECRET }}
-          GOOGLE_CLIENT_ID=${{ secrets.CI_GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.CI_GOOGLE_CLIENT_SECRET }}
+          GITLAB_CLIENT_ID=test-gitlab-client-id
+          GITLAB_CLIENT_SECRET=test-gitlab-client-secret
+          GOOGLE_CLIENT_ID=test-google-client-id
+          GOOGLE_CLIENT_SECRET=test-google-client-secret
           CSV_PATH=seed/data/shoreline_buildings.csv
           EOF
 
@@ -251,7 +251,7 @@ jobs:
     env:
       DO_PRODUCTION_HOST: ${{ secrets.DO_PRODUCTION_HOST }}
       DO_PRODUCTION_HOST_USER: ${{ secrets.DO_PRODUCTION_HOST_USER }}
-      DO_PRODUCTION_HOST_DEPLOY_PATH: /home/${{ secrets.DO_PRODUCTION_HOST_USER }}/shorelinebuildings/
+      DO_PRODUCTION_HOST_DEPLOY_PATH: ${{ secrets.O_PRODUCTION_HOST_DEPLOY_PATH }}
 
     steps:
       - uses: actions/checkout@v5
