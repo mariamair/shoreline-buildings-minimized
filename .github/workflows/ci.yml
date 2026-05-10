@@ -321,10 +321,9 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_USER_PASSWORD=${{ secrets.DB_USER_PASSWORD }}
             DB_HOST=db
+            QUERY_URL=http://backend:8081/api/graphql
             NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            GITLAB_CLIENT_ID=${{ secrets.GITLAB_CLIENT_ID }}
-            GITLAB_CLIENT_SECRET=${{ secrets.GITLAB_CLIENT_SECRET }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             CSV_PATH=seed/data/shoreline_buildings.csv

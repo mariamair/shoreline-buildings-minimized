@@ -7,6 +7,7 @@
 import { BUILDING_COUNT_QUERY, REGION_NAME_QUERY, REGIONS_QUERY } from './queries'
 
 const queryUrl = process.env.QUERY_URL
+console.log('QueryUrl is: ' + queryUrl)
 
 async function graphql(query, variables = {}) {
   try {
