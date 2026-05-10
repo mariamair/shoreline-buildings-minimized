@@ -312,8 +312,8 @@ jobs:
             DO_PRODUCTION_HOST_DEPLOY_PATH=$DO_PRODUCTION_HOST_DEPLOY_PATH
             IMAGE_TAG=${{ github.sha }}
             REGISTRY=ghcr.io/${{ github.repository }}
-            BACKEND_PORT=8080
-            FRONTEND_PORT=3000
+            BACKEND_PORT=8081
+            FRONTEND_PORT=3001
             DB_PORT=5432
             DB_NAME=${{ secrets.DB_NAME }}
             DB_ADMIN=${{ secrets.DB_ADMIN }}
@@ -321,7 +321,7 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_USER_PASSWORD=${{ secrets.DB_USER_PASSWORD }}
             DB_HOST=db
-            NEXTAUTH_URL=http://localhost:3000
+            NEXTAUTH_URL=http://localhost:3001
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
             GITLAB_CLIENT_ID=${{ secrets.GITLAB_CLIENT_ID }}
             GITLAB_CLIENT_SECRET=${{ secrets.GITLAB_CLIENT_SECRET }}
@@ -336,11 +336,11 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST << EOF
             cd $DO_PRODUCTION_HOST_DEPLOY_PATH
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            docker compose -p shorelinebuildings up -d db
+            docker compose -p shorelinebuildings up -d db --wait
             docker compose -p shorelinebuildings up seed
             docker compose -p shorelinebuildings up -d backend
             docker compose -p shorelinebuildings up -d frontend
             echo "Docker containers after deploy:"
-            sudo docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}"
+            docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}"
             exit
           EOF
