@@ -4,7 +4,7 @@
  * @author Maria Mair <mm225mz@student.lnu.se>
  */
 
-import { SignInButtonGitLab, SignInButtonGoogle } from '@/components/authbuttons'
+import { SignInButtonGoogle } from '@/components/authbuttons'
 import styles from './page.module.css'
 
 export default function Home() {
@@ -14,7 +14,6 @@ export default function Home() {
       <p className={styles.text}>Interactive visualization of data about shoreline buildings in Sweden.</p>
       <p className={styles.text}>Sign in to go to the dashboard.</p>
       <SignInButtonGoogle />
-      <SignInButtonGitLab />
     </main>
   )
 }

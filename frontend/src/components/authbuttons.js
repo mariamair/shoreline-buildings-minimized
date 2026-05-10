@@ -6,17 +6,6 @@
 
 import { signIn, signOut } from '@/auth'
 
-export function SignInButtonGitLab() {
-  return (
-    <form action={async () => { 
-      'use server'
-      await signIn('gitlab', { redirectTo: '/dashboard' }) 
-    }}>
-      <button type="submit">Sign in with GitLab (LNU)</button>
-    </form>
-  )
-}
-
 export function SignInButtonGoogle() {
   return (
     <form action={async () => { 
