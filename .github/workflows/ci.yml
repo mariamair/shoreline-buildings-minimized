@@ -272,7 +272,7 @@ jobs:
       - name: Ensure deploy path exists
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 \
-            $PRODUCTION_HOST_USER@$PRODUCTION_HOST \
+            $DO_PRODUCTION_HOST_USER@$DO_PRODUCTION_HOST \
             "mkdir -p $PRODUCTION_HOST_DEPLOY_PATH"
       
       - name: Copy docker compose and init files to server
