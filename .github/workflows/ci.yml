@@ -252,7 +252,7 @@ jobs:
     env:
       DO_PRODUCTION_HOST: ${{ secrets.DO_PRODUCTION_HOST }}
       DO_PRODUCTION_HOST_USER: ${{ secrets.DO_PRODUCTION_HOST_USER }}
-      DO_PRODUCTION_HOST_DEPLOY_PATH: ${{ secrets.O_PRODUCTION_HOST_DEPLOY_PATH }}
+      DO_PRODUCTION_HOST_DEPLOY_PATH: ${{ secrets.DO_PRODUCTION_HOST_DEPLOY_PATH }}
 
     steps:
       - uses: actions/checkout@v5
