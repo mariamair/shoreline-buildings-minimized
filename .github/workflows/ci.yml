@@ -268,6 +268,12 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H $DO_PRODUCTION_HOST >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+    
+      - name: Ensure deploy path exists
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 \
+            $PRODUCTION_HOST_USER@$PRODUCTION_HOST \
+            "mkdir -p $PRODUCTION_HOST_DEPLOY_PATH"
       
       - name: Copy docker compose and init files to server
         run: |
