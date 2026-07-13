@@ -32,10 +32,11 @@ export default function Numbers() {
     setFilterValues({ ...filterValues, parentRegionCode: selectedRegionCode })
   }
 
-  // Display region selection only when "Kommuner" (regionTypeId: 3) is selected
+  // Display region selection only when "Kommuner" (regionTypeId: 3) is selected and preselect "01" (Stockholms län) if no parent region code is selected yet
   let displayRegionSelection = false
   if (filterValues.regionTypeId === 3) {
     displayRegionSelection = true
+    filterValues.parentRegionCode = filterValues.parentRegionCode || '01'
   } else {
     displayRegionSelection = false
     delete filterValues.parentRegionCode
