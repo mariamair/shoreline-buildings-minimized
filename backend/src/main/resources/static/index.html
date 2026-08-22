@@ -10,11 +10,8 @@
 
 <body>
   <h1>Shoreline Buildings API</h1>
-  <p>This application holds data about shoreline buildings in Sweden. It contains the number of buildings counted at shorelines in Sweden and reported per region, building type, shoreline type, area type and year.</p>
-  <p><em><img class="icon" src="https://github.githubassets.com/images/icons/emoji/unicode/270f.png?v8" alt="pen">Please note that the application only provides the data in Swedish.</em></p>
+  <p>This application holds data about shoreline buildings in Sweden. The live version contains the number of buildings counted at shorelines in Sweden per region, area type and year.</p>
   <p>It exposes a GraphQL API to search for the data.</p>
-
-  <p>It uses a REST API with JWT (Json Web Token) for authentication.</p>
 
   <h2>Data source</h2>
   <p>Data set: <a
@@ -24,18 +21,16 @@
   <p>Source: <a href="https://www.scb.se/en_/">Statistics Sweden</a></p>
 
   <h2>Usage</h2>
-  <p>URL for the buildings API: https://cu3156.camp.lnu.se/api/graphql</p>
-  <p>URL for the authentication API: https://cu3156.camp.lnu.se/api/auth</p>
-  <p>More documentation, complete with example requests and responses can be found in 
-    <a href="https://documenter.getpostman.com/view/39898331/2sBXigNZNU#a9a1ffe2-7229-4ead-973d-d71d6d003a5a">Postman</a> <em>(Note: loads slowly)</em>
-  </p>
+  <p>URL to fetch data from the buildings API: <em>https://shorelinebuildings.mariamair.se/api/graphql</em></p>
+  <p>Frontend application using the API: <a href="https://shorelinebuildings.mariamair.se/">Shoreline buildings application</a></p>
 
-  <h3>Testing the API</h3>
-  <p>The API has a playground where you can test it: <a href="https://cu3156.camp.lnu.se/api/graphiql">Playground to test the API</a></p>
-  <p>You need to register and log in to be able to create, update and delete resources. Follow the instructions in <a href="https://documenter.getpostman.com/view/39898331/2sBXikoB8y">Authentication for the Shoreline Buildings API</a> to do so.</p>
-  <p><em><img class="icon" src="https://github.githubassets.com/images/icons/emoji/unicode/270f.png?v8" alt="pen">Please note that a token only is valid for five minutes.</em></p>
+  <h2>Tests and documentation</h2>
+  <p><a href="https://shorelinebuildings.mariamair.se/api/graphiql">Playground to test the API</a></p>
+  <p><a href="https://documenter.getpostman.com/view/39898331/2sBYArVt21">Postman test documentation</a> <span>with example requests and responses <em>(Note: loads slowly)</em></span></p>
+  <p><a href="https://github.com/mariamair/shoreline-buildings-minimized">GitHub repository</a></p>
 
   <h2>Description of the data</h2>
+    <p><em><img class="icon" src="https://github.githubassets.com/images/icons/emoji/unicode/270f.png?v8" alt="pen">Please note that the application only provides the data labels in Swedish.</em></p>
   <table>
     <tr>
       <th>Field</th>
@@ -57,36 +52,6 @@
           <li>riket</li>
           <li>län</li>
           <li>kommun</li>
-        </ul>
-      </td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>buildingType</td>
-      <td>The current item's building type, specified with id and name.</td>
-      <td>
-        <ul>
-          <li>bostad </li>
-          <li>industri</li>
-          <li>samhällsfunktion</li>
-          <li>verksamhet</li>
-          <li>ekonomibyggndad</li>
-          <li>komplementbyggnad</li>
-          <li>övrig
-            byggnad</li>
-          <li>totalt</li>
-        </ul>
-      </td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>shorelineType</td>
-      <td>The current item's shoreline type, specified with id and name.</td>
-      <td>
-        <ul>
-          <li>hav</li>
-          <li>inlandsvatten</li>
-          <li>totalt</li>
         </ul>
       </td>
       <td></td>
@@ -130,8 +95,10 @@
 
   </table>
 
-  <h2>Links</h2>
-  <p><a href="https://github.com/mariamair/shoreline-buildings">GitHub repository</a></p>
+    
+  <h2>Larger version</h2>
+  <p>The original, larger version also held data about shoreline buildings per building type and shoreline type. It offered the possibility to edit data and used a REST API with JWT (Json Web Token) for authentication.</p>
+  <p><a href="https://github.com/mariamair/shoreline-buildings">GitHub repository of the maximized version</a></p>
 
 </body>
 
