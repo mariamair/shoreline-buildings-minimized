@@ -8,6 +8,7 @@
 const nextConfig = {
   reactCompiler: true,
   output: 'standalone',
+  basePath: '/shorelinebuildings',
 }
 
 export default nextConfig
