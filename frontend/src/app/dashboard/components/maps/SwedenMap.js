@@ -9,6 +9,7 @@
 import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts'
 import { useRouter } from 'next/navigation'
+import { withBasePath } from '@/lib/basePath'
 
 export default function SwedenMap({ data, onRegionClick }) {
 
@@ -31,7 +32,7 @@ export default function SwedenMap({ data, onRegionClick }) {
     const chart = echarts.init(chartRef.current)
 
     // Load GeoJSON and register it with ECharts
-    fetch('/geodata/swedish_regions.geojson')
+    fetch(withBasePath('/geodata/swedish_regions.geojson'))
       .then(res => res.json())
       .then(geoJson => {
         echarts.registerMap('sweden', geoJson)

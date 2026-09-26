@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts'
 import { useRouter } from 'next/navigation'
 import styles from './RegionMap.module.css'
+import { withBasePath } from '@/lib/basePath'
 
 export default function RegionMap({ data, regionCode }) {
   const mapData = data.map(item => ({ 
@@ -30,7 +31,7 @@ export default function RegionMap({ data, regionCode }) {
     const chart = echarts.init(chartRef.current)
 
     // Load GeoJSON and register it with ECharts
-    fetch('/geodata/swedish_municipalities.json')
+    fetch(withBasePath('/geodata/swedish_municipalities.json'))
       .then(res => res.json())
       .then(geoJson => {
         // Only display selected region
