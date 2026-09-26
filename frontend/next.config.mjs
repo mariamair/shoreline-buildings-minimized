@@ -10,7 +10,7 @@ const nextConfig = {
   output: 'standalone',
   basePath: '/shorelinebuildings',
   env: {
-    NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_BASE_PATH: '/shorelinebuildings',
   },
 }
 
