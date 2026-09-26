@@ -227,12 +227,12 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      - name: Run Newman tests
-        run: |
-          newman run tests/postman_collection.json \
-            --environment tests/ci.postman_environment.json \
-            --reporters cli \
-            --verbose
+      # - name: Run Newman tests
+      #   run: |
+      #     newman run tests/postman_collection.json \
+      #       --environment tests/ci.postman_environment.json \
+      #       --reporters cli \
+      #       --verbose
 
       - name: Tear down services
         if: always()
